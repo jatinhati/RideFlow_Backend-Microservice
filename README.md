@@ -1,12 +1,12 @@
-## 🚗 UberProject - Microservices Architecture
+## 🚗 RideFlowProject - Microservices Architecture
 
-This repository contains a set of microservices for a simplified Uber-like backend system. It follows a scalable and modular architecture using Spring Boot, Flyway for DB migrations, and Spring Security for authentication.
+This repository contains a set of microservices for a simplified RideFlow-like backend system. It follows a scalable and modular architecture using Spring Boot, Flyway for DB migrations, and Spring Security for authentication.
 
 ## 📁 Project Structure
 
-UberProject-AuthService/
-UberProject-EntityService/
-UberProject-ReviewService/
+RideFlowProject-AuthService/
+RideFlowProject-EntityService/
+RideFlowProject-ReviewService/
 
 AuthService – Manages user authentication, registration, and secure access.
 
@@ -74,7 +74,7 @@ MySQL (
 
 
 
-cd UberProject-AuthService
+cd RideFlowProject-AuthService
 ./mvnw spring-boot:run
 Repeat for each service.
 

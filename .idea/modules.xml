@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/Uber-Backend.iml" filepath="$PROJECT_DIR$/.idea/Uber-Backend.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/UberProject-Entity_Service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/UberProject-Entity_Service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/UberProject-ReviewService.main.iml" filepath="$PROJECT_DIR$/.idea/modules/UberProject-ReviewService.main.iml" />
+    </modules>
+  </component>
+</project>
