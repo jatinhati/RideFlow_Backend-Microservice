@@ -1,12 +1,25 @@
 # 🚗 RideFlow_Backend-Microservice
 
-A production-style, scalable Uber-like backend system built using a **microservices architecture** with Spring Boot. The system covers the complete ride-hailing flow — authentication, ride booking, real-time driver location tracking, reviews, and service discovery.
+A production-style, scalable **Uber-like backend** built using a **microservices architecture** with Spring Boot.
+
+This repository focuses on **backend orchestration**: authentication, ride booking, driver discovery, realtime ride request delivery, and post-ride reviews — with service discovery, async communication, and shared domain models.
+
+<p align="center">
+  <img alt="Java" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/java/java-original.svg" height="40"/>
+  <img alt="Spring" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/spring/spring-original.svg" height="40"/>
+  <img alt="MySQL" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/mysql/mysql-original.svg" height="40"/>
+  <img alt="Redis" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/redis/redis-original.svg" height="40"/>
+  <img alt="Kafka" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/apachekafka/apachekafka-original.svg" height="40"/>
+  <img alt="Gradle" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/gradle/gradle-original.svg" height="40"/>
+</p>
 
 ---
 
 ## 📋 Table of Contents
 
+- [What this project demonstrates](#-what-this-project-demonstrates)
 - [Architecture Overview](#-architecture-overview)
+- [End-to-end ride flow (happy path)](#-end-to-end-ride-flow-happy-path)
 - [Services](#-services)
 - [Tech Stack](#-tech-stack)
 - [Domain Models](#-domain-models)
@@ -20,35 +33,49 @@ A production-style, scalable Uber-like backend system built using a **microservi
 
 ---
 
+## 🎯 What this project demonstrates
+
+This backend is designed as a **real-world microservices learning project**. It demonstrates:
+
+- **Service separation by domain** (Auth, Booking, Location, Review)
+- **Service discovery** using Eureka (services can find each other dynamically)
+- **Shared domain library** (Entity Service published as a Maven artifact to avoid entity duplication)
+- **Async + decoupled communication** via Kafka for events
+- **Realtime communication** via WebSocket for sending ride requests to drivers
+- **Geo queries** using Redis GEO for fast nearby-driver searches
+- **Database migrations** using Flyway for consistent schema versioning
+
+---
+
 ## 🏗 Architecture Overview
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────────────┐
 │                        Client (Mobile / Web)                        │
 └────────────────────────────┬────────────────────────────────────────┘
                              │ REST / WebSocket
           ┌──────────────────┼──────────────────┐
           ▼                  ▼                  ▼
-  ┌───────────────┐  ┌──────────────┐  ┌────────────────┐
-  │  Auth Service │  │Booking Service│  │ Review Service │
-  │   port: 8081  │  │  port: 8001  │  │   port: 8083   │
-  └───────┬───────┘  └──────┬───────┘  └───────┬────────┘
-          │                 │                   │
-          │         ┌───────▼────────┐          │
-          │         │Location Service│          │
-          │         │   port: 7777   │          │
-          │         └───────┬────────┘          │
-          │                 │                   │
-          └─────────────────┼───────────────────┘
-                            ▼
-               ┌────────────────────────┐
-               │  Eureka Server (8761)  │  ← Service Discovery
-               └────────────────────────┘
-                            │
-               ┌────────────▼───────────┐
-               │    Entity Service      │  ← Shared Domain Library
-               │  (Maven Local Artifact)│
-               └────────────────────────┘
+  ┌───────────────┐  ┌───────────────┐  ┌────────────────┐
+  │  Auth Service  │  │ Booking Service│  │ Review Service │
+  │   port: 8081   │  │   port: 8001  │  │   port: 8083   │
+  └───────┬────────┘  └───────┬───────┘  └───────┬────────┘
+          │                   │                  │
+          │           ┌───────▼────────┐         │
+          │           │Location Service│         │
+          │           │   port: 7777   │         │
+          │           └───────┬────────┘         │
+          │                   │                  │
+          └───────────────────┼──────────────────┘
+                              ▼
+                 ┌────────────────────────┐
+                 │  Eureka Server (8761)  │  ← Service Discovery
+                 └────────────────────────┘
+                              │
+                 ┌────────────▼───────────┐
+                 │    Entity Service      │  ← Shared Domain Library
+                 │  (Maven Local Artifact)│
+                 └────────────────────────┘
 ```
 
 **Key communication patterns:**
@@ -56,6 +83,22 @@ A production-style, scalable Uber-like backend system built using a **microservi
 - **Apache Kafka** — Event-driven messaging between services
 - **Spring WebSocket** — Real-time ride-request push to drivers
 - **Netflix Eureka** — Dynamic service registration & discovery
+
+---
+
+## 🧭 End-to-end ride flow (happy path)
+
+This is the typical flow the system is designed to support:
+
+1. **Passenger signs up / signs in** via Auth Service.
+   - Auth returns a **JWT as an HTTP-only cookie**.
+2. **Passenger creates a booking** via Booking Service.
+3. Booking Service asks Location Service for **nearby available drivers**.
+   - Location Service uses **Redis GEO** to find drivers within a radius.
+4. Booking Service pushes a **ride request event** to drivers in realtime via **WebSocket**.
+5. A driver accepts → Booking Service **assigns the driver** and updates booking state.
+6. Booking Service publishes booking lifecycle events via **Kafka** (for async reactions).
+7. After completion, passenger can create a **review** via Review Service.
 
 ---
 
@@ -137,7 +180,7 @@ A production-style, scalable Uber-like backend system built using a **microservi
 
 All entities live in **Entity Service** and are shared across services.
 
-```
+```text
 Passenger          Driver
 ├── id             ├── id
 ├── name           ├── name
@@ -436,7 +479,7 @@ eureka:
 
 ## 🔗 Inter-Service Communication
 
-```
+```text
 Booking Service
     │
     ├──[Retrofit2 async HTTP]──► Location Service  (GET nearby drivers)
@@ -497,4 +540,3 @@ cd <service-directory>
 **Jatin Hati**
 💻 Engineering Student | Aspiring Full Stack Developer
 🔗 GitHub: [@jatinhati](https://github.com/jatinhati)
-
