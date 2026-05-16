@@ -15,8 +15,40 @@ This repository focuses on **backend orchestration**: authentication, ride booki
 
 ---
 
+## 🧩 System Architecture Diagram
+
+```text
+┌─────────────────────────────────────────────────────────────────────┐
+│                        Client (Mobile / Web)                        │
+└────────────────────────────┬────────────────────────────────────────┘
+                             │ REST / WebSocket
+          ┌──────────────────┼──────────────────┐
+          ▼                  ▼                  ▼
+  ┌───────────────┐  ┌───────────────┐  ┌────────────────┐
+  │  Auth Service  │  │ Booking Service│  │ Review Service │
+  │   port: 8081   │  │   port: 8001  │  │   port: 8083   │
+  └───────┬────────┘  └───────┬───────┘  └───────┬────────┘
+          │                   │                  │
+          │           ┌───────▼────────┐         │
+          │           │Location Service│         │
+          │           │   port: 7777   │         │
+          │           └───────┬────────┘         │
+          │                   │                  │
+          └───────────────────┼──────────────────┘
+                              ▼
+                 ┌────────────────────────┐
+                 │  Eureka Server (8761)  │  ← Service Discovery
+                 └────────────────────────┘
+                              │
+                 ┌────────────▼───────────┐
+                 │    Entity Service      │  ← Shared Domain Library
+                 │  (Maven Local Artifact)│
+                 └────────────────────────┘
+```
+
 ## 📋 Table of Contents
 
+- [System Architecture Diagram](#-system-architecture-diagram)
 - [What this project demonstrates](#-what-this-project-demonstrates)
 - [Architecture Overview](#-architecture-overview)
 - [End-to-end ride flow (happy path)](#-end-to-end-ride-flow-happy-path)
@@ -48,35 +80,6 @@ This backend is designed as a **real-world microservices learning project**. It 
 ---
 
 ## 🏗 Architecture Overview
-
-```text
-┌─────────────────────────────────────────────────────────────────────┐
-│                        Client (Mobile / Web)                        │
-└────────────────────────────┬────────────────────────────────────────┘
-                             │ REST / WebSocket
-          ┌──────────────────┼──────────────────┐
-          ▼                  ▼                  ▼
-  ┌───────────────┐  ┌───────────────┐  ┌────────────────┐
-  │  Auth Service  │  │ Booking Service│  │ Review Service │
-  │   port: 8081   │  │   port: 8001  │  │   port: 8083   │
-  └───────┬────────┘  └───────┬───────┘  └───────┬────────┘
-          │                   │                  │
-          │           ┌───────▼────────┐         │
-          │           │Location Service│         │
-          │           │   port: 7777   │         │
-          │           └───────┬────────┘         │
-          │                   │                  │
-          └───────────────────┼──────────────────┘
-                              ▼
-                 ┌────────────────────────┐
-                 │  Eureka Server (8761)  │  ← Service Discovery
-                 └────────────────────────┘
-                              │
-                 ┌────────────▼───────────┐
-                 │    Entity Service      │  ← Shared Domain Library
-                 │  (Maven Local Artifact)│
-                 └────────────────────────┘
-```
 
 **Key communication patterns:**
 - **Retrofit2** — Booking Service → Location Service (async HTTP)
